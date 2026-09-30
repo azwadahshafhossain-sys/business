@@ -2115,77 +2115,42 @@
       return true;
     }
 
-    async function loadFreshStoreData() {
-      try {
-        const [prodRes, catRes, customRes] = await Promise.allSettled([
-          fetch(`/api/luxera/products?store_id=${encodeURIComponent(window.CURRENT_STORE_ID)}`),
-          fetch(`/api/luxera/categories?store_id=${encodeURIComponent(window.CURRENT_STORE_ID)}`),
-          fetch(`/api/theme-editor/load?store_id=${encodeURIComponent(window.CURRENT_STORE_ID)}`)
-        ]);
-        if (prodRes.status === 'fulfilled' && prodRes.value.ok) {
-          const pData = await prodRes.value.json();
-          if (pData && Array.isArray(pData.products) && pData.products.length > 0) {
-            const prodsChanged = !areProductCatalogsIdentical(STORE_PRODUCTS, pData.products);
-            if (prodsChanged) {
-              STORE_PRODUCTS = pData.products;
-              window.STORE_PRODUCTS = STORE_PRODUCTS;
-              window.PRODUCTS = STORE_PRODUCTS;
-              try {
-                localStorage.setItem('mc_products_' + window.CURRENT_STORE_ID, JSON.stringify(STORE_PRODUCTS));
-                localStorage.setItem('mc_products_time_' + window.CURRENT_STORE_ID, Date.now());
-              } catch (e) {}
-              syncStoreCategoriesFromProducts();
-              if (typeof renderStackedCategorySections === 'function') renderStackedCategorySections(true);
-              if (typeof renderMobileCategories === 'function') renderMobileCategories(true);
-            }
-            if (!activePdpProduct && STORE_PRODUCTS.length > 0) {
-              activePdpProduct = STORE_PRODUCTS[0];
-            } else if (activePdpProduct) {
-              const refreshed = STORE_PRODUCTS.find(x => String(x.id) === String(activePdpProduct.id) || (x.sku && String(x.sku) === String(activePdpProduct.sku)));
-              if (refreshed) activePdpProduct = refreshed;
-            }
-            const viewProd = document.getElementById('viewProduct');
-            if (viewProd && !viewProd.classList.contains('hidden') && activePdpProduct) {
-              openProductPage(activePdpProduct.id, { silentTracking: true });
-            }
-            const viewCat = document.getElementById('viewCategory');
-            if (viewCat && !viewCat.classList.contains('hidden') && currentActiveCategory) {
-              openCategoryView(currentActiveCategory);
-            }
-          }
-        }
-        if (catRes.status === 'fulfilled' && catRes.value.ok) {
-          const cData = await catRes.value.json();
-          if (cData && Array.isArray(cData.categories) && cData.categories.length > 0) {
-            const catsChanged = !areCategoriesIdentical(STORE_CATEGORIES, cData.categories);
-            if (catsChanged) {
-              STORE_CATEGORIES = cData.categories;
-              window.STORE_CATEGORIES = STORE_CATEGORIES;
-              try {
-                localStorage.setItem('mc_categories_' + window.CURRENT_STORE_ID, JSON.stringify(STORE_CATEGORIES));
-                localStorage.setItem('mc_categories_time_' + window.CURRENT_STORE_ID, Date.now());
-              } catch (e) {}
-              syncStoreCategoriesFromProducts();
-              if (typeof renderStackedCategorySections === 'function') renderStackedCategorySections(true);
-              if (typeof renderMobileCategories === 'function') renderMobileCategories(true);
-              if (typeof renderDesktopCategories === 'function') renderDesktopCategories();
-              const viewCat = document.getElementById('viewCategory');
-              if (viewCat && !viewCat.classList.contains('hidden') && currentActiveCategory) {
-                openCategoryView(currentActiveCategory);
-              }
-            }
-          }
-        }
-        if (customRes.status === 'fulfilled' && customRes.value.ok) {
-          const tData = await customRes.value.json();
-          if (tData && tData.custom) {
-            liveCustomData = tData.custom;
-            applyCustomThemeData(liveCustomData);
-          }
-        }
-      } catch (e) {}
-    }
+   async function loadFreshStoreData() {
+  try {
+    // সরাসরি products.json থেকে লাইভ ডেটা ফেচ করবে (ক্যাশিং বাইপাস করার জন্য টাইমস্ট্যাম্প যুক্ত)
+    const res = await fetch('products.json?v=' + Date.now());
+    if (res.ok) {
+      const data = await res.json();
+      
+      // ১. প্রোডাক্ট লিস্ট আপডেট
+      if (data && Array.isArray(data.products) && data.products.length > 0) {
+        STORE_PRODUCTS = data.products;
+        window.STORE_PRODUCTS = STORE_PRODUCTS;
+        window.PRODUCTS = STORE_PRODUCTS;
+      }
+      
+      // ২. ক্যাটাগরি আপডেট
+      if (data && Array.isArray(data.categories) && data.categories.length > 0) {
+        STORE_CATEGORIES = data.categories;
+        window.STORE_CATEGORIES = STORE_CATEGORIES;
+      }
+      
+      // ৩. সেটিংস, ব্যানার ও নাম আপডেট
+      if (data && data.settings) {
+        STORE_SETTINGS = Object.assign(STORE_SETTINGS, data.settings);
+        applyStoreSettingsUI();
+      }
 
+      // UI রি-রেন্ডার
+      syncStoreCategoriesFromProducts();
+      if (typeof renderStackedCategorySections === 'function') renderStackedCategorySections(true);
+      if (typeof renderMobileCategories === 'function') renderMobileCategories(true);
+      if (typeof renderDesktopCategories === 'function') renderDesktopCategories();
+    }
+  } catch (err) {
+    console.warn('products.json fetch note:', err);
+  }
+}
     // -------------------------------------------------------------------------
     // 12.3 HERO BANNER CAROUSEL (3 Banners, Smooth Auto Slide Left)
     // -------------------------------------------------------------------------
