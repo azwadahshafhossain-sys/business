@@ -3,22 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard • MultiCommerse Store Manager</title>
+  <title>Admin Dashboard • MultiCommerse Control Engine</title>
 
+  <!-- Google Fonts: Hind Siliguri + Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Phosphor Icons CDN -->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
   <style>
-    body { font-family: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif; background-color: #f8fafc; }
-    .font-bangla { font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif; }
+    body {
+      font-family: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .font-bangla {
+      font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row antialiased text-slate-800">
 
-  <!-- SIDEBAR -->
+  <!-- ========================================================================= -->
+  <!-- SIDEBAR NAVIGATION -->
+  <!-- ========================================================================= -->
   <aside class="w-full md:w-64 bg-black text-white shrink-0 flex flex-col justify-between border-r border-slate-800">
     <div>
       <div class="h-16 flex items-center gap-3 px-6 border-b border-slate-800">
@@ -36,17 +51,25 @@
           <i class="ph-bold ph-package text-base"></i>
           <span>পণ্যসমূহ (Products)</span>
         </button>
+
         <button type="button" onclick="switchTab('tabGeneral')" id="navTabGeneral" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition">
           <i class="ph-bold ph-sliders-horizontal text-base"></i>
           <span>দোকানের নাম ও টেক্সট</span>
         </button>
+
         <button type="button" onclick="switchTab('tabBanners')" id="navTabBanners" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition">
           <i class="ph-bold ph-image text-base"></i>
           <span>হোমপেজ ব্যানার (৩টি)</span>
         </button>
+
         <button type="button" onclick="switchTab('tabDelivery')" id="navTabDelivery" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition">
           <i class="ph-bold ph-truck text-base"></i>
           <span>ডেলিভারি চার্জ ও ফোন</span>
+        </button>
+
+        <button type="button" onclick="switchTab('tabPublish')" id="navTabPublish" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 hover:text-white hover:bg-slate-900 transition">
+          <i class="ph-bold ph-cloud-arrow-up text-base"></i>
+          <span>GitHub-এ পাবলিশ (JSON)</span>
         </button>
       </nav>
     </div>
@@ -54,232 +77,360 @@
     <div class="p-4 border-t border-slate-800 space-y-2">
       <a href="index.html" target="_blank" class="w-full py-2.5 px-3 rounded-xl bg-white text-black text-xs font-black flex items-center justify-center gap-2 hover:bg-slate-200 transition">
         <i class="ph-bold ph-arrow-square-out"></i>
-        <span>ওয়েবসাইটে পরিবর্তন দেখুন</span>
+        <span>ওয়েবসাইটে লাইভ দেখুন</span>
       </a>
     </div>
   </aside>
 
-  <!-- MAIN -->
-  <main class="flex-1 flex flex-col min-w-0">
-    <header class="h-16 bg-white border-b border-slate-200 px-6 sm:px-8 flex items-center justify-between sticky top-0 z-30">
+  <!-- ========================================================================= -->
+  <!-- MAIN CONTENT CONTAINER -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    
+    <!-- Top Action Bar -->
+    <header class="h-16 bg-white border-b border-slate-200 px-6 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
       <h2 id="topBarTitle" class="font-black text-slate-900 text-base">পণ্য তালিকা ও স্টক</h2>
-      <button type="button" onclick="saveAllChangesToBrowser(true)" class="px-5 py-2.5 rounded-xl bg-black hover:bg-slate-800 active:scale-95 text-white font-extrabold text-xs transition flex items-center gap-2 shadow-lg">
-        <i class="ph-bold ph-floppy-disk text-base"></i>
-        <span>সেভ করে ওয়েবসাইটে আপডেট করুন</span>
-      </button>
+      
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="openPublishModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm">
+          <i class="ph-bold ph-copy text-sm"></i>
+          <span>ওয়েবসাইটে আপডেট করুন (JSON)</span>
+        </button>
+      </div>
     </header>
 
     <div class="p-6 sm:p-8 max-w-5xl w-full mx-auto space-y-6">
 
-      <!-- TAB: PRODUCTS -->
+      <!-- =================================================================== -->
+      <!-- TAB 1: PRODUCTS MANAGEMENT -->
+      <!-- =================================================================== -->
       <section id="tabProducts" class="space-y-4">
         <div class="flex items-center justify-between">
-          <p class="text-xs text-slate-500 font-bangla">এখানে নতুন পণ্য যোগ করুন বা বর্তমান পণ্যের ছবি ও দাম পরিবর্তন করুন:</p>
-          <button type="button" onclick="openProductEditModal(null)" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition">
+          <p class="text-xs text-slate-500 font-bangla">পণ্য যোগ করুন, এডিট করুন বা মুছে ফেলুন:</p>
+          <button type="button" onclick="openProductEditModal(null)" class="px-4 py-2.5 rounded-xl bg-black hover:bg-slate-800 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm">
             <i class="ph-bold ph-plus-circle text-base"></i>
             <span>নতুন প্রোডাক্ট যোগ করুন</span>
           </button>
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-black text-[10px]">
-              <tr>
-                <th class="p-4">ছবি</th>
-                <th class="p-4">পণ্যের নাম</th>
-                <th class="p-4">ক্যাটাগরি</th>
-                <th class="p-4">মূল্য (৳)</th>
-                <th class="p-4">রেগুলার (৳)</th>
-                <th class="p-4 text-right">অ্যাকশন</th>
-              </tr>
-            </thead>
-            <tbody id="adminProductsTbody" class="divide-y divide-slate-100"></tbody>
-          </table>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-black text-[10px]">
+                <tr>
+                  <th class="p-4">ছবি</th>
+                  <th class="p-4">পণ্যের নাম</th>
+                  <th class="p-4">ক্যাটাগরি</th>
+                  <th class="p-4">বিক্রয় মূল্য</th>
+                  <th class="p-4">রেগুলার মূল্য</th>
+                  <th class="p-4 text-center">ফ্রি ডেলিভারি</th>
+                  <th class="p-4 text-right">অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody id="adminProductsTbody" class="divide-y divide-slate-100">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <!-- TAB: GENERAL -->
+      <!-- =================================================================== -->
+      <!-- TAB 2: GENERAL SETTINGS -->
+      <!-- =================================================================== -->
       <section id="tabGeneral" class="hidden bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-xs">
         <h3 class="font-black text-sm uppercase border-b pb-2">দোকানের নাম ও টেক্সট</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">ওয়েবসাইটের নাম (Store Name):</label>
-            <input type="text" id="cfgBrandName" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-bold">
+            <input type="text" id="cfgBrandName" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-bold outline-none focus:border-black">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">ট্যাগলাইন (Tagline):</label>
-            <input type="text" id="cfgBrandTagline" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs">
+            <input type="text" id="cfgBrandTagline" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs outline-none focus:border-black">
           </div>
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">উপরে কালো নোটিফিকেশন বার টেক্সট:</label>
-          <input type="text" id="cfgAnnouncement" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-bangla">
+          <input type="text" id="cfgAnnouncement" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-bangla outline-none focus:border-black">
         </div>
       </section>
 
-      <!-- TAB: BANNERS -->
+      <!-- =================================================================== -->
+      <!-- TAB 3: BANNERS -->
+      <!-- =================================================================== -->
       <section id="tabBanners" class="hidden bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-xs">
         <h3 class="font-black text-sm uppercase border-b pb-2">হোমপেজ স্লাইডার ব্যানার</h3>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">ব্যানার ১ এর ছবির লিংক (Image URL):</label>
-          <input type="url" id="cfgBanner1" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono">
+          <input type="url" id="cfgBanner1" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono outline-none focus:border-black">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">ব্যানার ২ এর ছবির লিংক (Image URL):</label>
-          <input type="url" id="cfgBanner2" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono">
+          <input type="url" id="cfgBanner2" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono outline-none focus:border-black">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">ব্যানার ৩ এর ছবির লিংক (Image URL):</label>
-          <input type="url" id="cfgBanner3" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono">
+          <input type="url" id="cfgBanner3" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono outline-none focus:border-black">
         </div>
       </section>
 
-      <!-- TAB: DELIVERY -->
+      <!-- =================================================================== -->
+      <!-- TAB 4: DELIVERY & CONTACT -->
+      <!-- =================================================================== -->
       <section id="tabDelivery" class="hidden bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-xs">
         <h3 class="font-black text-sm uppercase border-b pb-2">ডেলিভারি চার্জ ও যোগাযোগের ফোন</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">ঢাকার ভেতরে ডেলিভারি চার্জ (৳):</label>
-            <input type="number" id="cfgInsideCharge" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono">
+            <label class="block text-xs font-bold text-slate-700 mb-1">ঢাকার ভেতরে ডেলিভারি চার্জ (টাকায়):</label>
+            <input type="number" id="cfgInsideCharge" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono outline-none focus:border-black">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">ঢাকার বাইরে ডেলিভারি চার্জ (৳):</label>
-            <input type="number" id="cfgOutsideCharge" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono">
+            <label class="block text-xs font-bold text-slate-700 mb-1">ঢাকার বাইরে ডেলিভারি চার্জ (টাকায়):</label>
+            <input type="number" id="cfgOutsideCharge" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono outline-none focus:border-black">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">হটলাইন মোবাইল নম্বর:</label>
-            <input type="text" id="cfgHotline" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono">
+            <input type="text" id="cfgHotline" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono outline-none focus:border-black">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">হোয়াটসঅ্যাপ নম্বর (যেমন 8801700000000):</label>
-            <input type="text" id="cfgWhatsapp" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono">
+            <input type="text" id="cfgWhatsapp" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-mono outline-none focus:border-black">
           </div>
         </div>
+        <div class="space-y-3 pt-2">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ডেলিভারি পলিসি টেক্সট:</label>
+            <textarea id="cfgDeliveryPolicy" rows="2" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-bangla outline-none focus:border-black"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">রিটার্ন পলিসি টেক্সট:</label>
+            <textarea id="cfgReturnPolicy" rows="2" oninput="autoSaveDraft()" class="w-full p-2.5 border rounded-xl bg-slate-50 text-xs font-bangla outline-none focus:border-black"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TAB 5: PUBLISH TO GITHUB (DIRECT JSON GENERATOR) -->
+      <!-- =================================================================== -->
+      <section id="tabPublish" class="hidden bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-xs">
+        <div class="border-b pb-3 flex justify-between items-center">
+          <div>
+            <h3 class="font-black text-sm uppercase">GitHub-এ পার্মানেন্ট আপডেট করার পদ্ধতি</h3>
+            <p class="text-xs text-slate-500 font-bangla mt-0.5">নিচের জেনারেট হওয়া কোডটি কপি করে আপনার GitHub রিপোজিটরির <code>products.json</code> ফাইলে পেস্ট করে Commit দিন।</p>
+          </div>
+          <button type="button" onclick="copyPublishedJson()" class="px-4 py-2 rounded-xl bg-black hover:bg-slate-800 text-white font-extrabold text-xs flex items-center gap-1.5 transition shadow-sm">
+            <i class="ph-bold ph-copy"></i>
+            <span>কোড কপি করুন</span>
+          </button>
+        </div>
+
+        <textarea id="jsonPreviewArea" rows="16" readonly class="w-full p-4 rounded-xl bg-slate-900 text-emerald-400 font-mono text-xs outline-none leading-relaxed border border-slate-800 select-all"></textarea>
       </section>
 
     </div>
   </main>
 
+  <!-- ======================================================================= -->
   <!-- MODAL: ADD / EDIT PRODUCT -->
+  <!-- ======================================================================= -->
   <div id="productModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto space-y-4 border border-slate-200 shadow-2xl relative">
-      <button type="button" onclick="closeProductEditModal()" class="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100"><i class="ph-bold ph-x text-lg"></i></button>
+      <button type="button" onclick="closeProductEditModal()" class="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-800 transition">
+        <i class="ph-bold ph-x text-lg"></i>
+      </button>
+
       <h3 id="modalProductHeading" class="text-base font-black text-slate-900 border-b pb-2">প্রোডাক্ট এডিট করুন</h3>
 
       <form onsubmit="handleSaveProductForm(event)" class="space-y-3 text-xs">
         <input type="hidden" id="pFormId">
+        
         <div>
           <label class="block font-bold mb-1">পণ্যের নাম (Title): *</label>
-          <input type="text" id="pFormTitle" required class="w-full p-2.5 border rounded-xl bg-slate-50">
+          <input type="text" id="pFormTitle" required class="w-full p-2.5 border rounded-xl bg-slate-50 font-bold outline-none focus:border-black">
         </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold mb-1">বিক্রয় মূল্য (৳): *</label>
-            <input type="number" id="pFormPrice" required class="w-full p-2.5 border rounded-xl bg-slate-50 font-mono">
+            <input type="number" id="pFormPrice" required class="w-full p-2.5 border rounded-xl bg-slate-50 font-mono outline-none focus:border-black">
           </div>
           <div>
             <label class="block font-bold mb-1">রেগুলার মূল্য (৳):</label>
-            <input type="number" id="pFormRegularPrice" class="w-full p-2.5 border rounded-xl bg-slate-50 font-mono">
+            <input type="number" id="pFormRegularPrice" class="w-full p-2.5 border rounded-xl bg-slate-50 font-mono outline-none focus:border-black">
           </div>
         </div>
+
         <div>
           <label class="block font-bold mb-1">ক্যাটাগরি আইডি (wholesale, trending, kitchen ইত্যাদি): *</label>
-          <input type="text" id="pFormCategory" required class="w-full p-2.5 border rounded-xl bg-slate-50 font-mono">
+          <input type="text" id="pFormCategory" required class="w-full p-2.5 border rounded-xl bg-slate-50 font-mono outline-none focus:border-black">
         </div>
+
         <div>
           <label class="block font-bold mb-1">ছবির লিঙ্ক (Image URL): *</label>
-          <input type="url" id="pFormImages" required placeholder="https://..." class="w-full p-2.5 border rounded-xl bg-slate-50 font-mono">
+          <input type="url" id="pFormImages" required placeholder="https://..." class="w-full p-2.5 border rounded-xl bg-slate-50 font-mono outline-none focus:border-black">
         </div>
-        <div>
-          <label class="block font-bold mb-1">ব্যাজ (যেমন WHOLESALE, HOT DEAL):</label>
-          <input type="text" id="pFormBadge" class="w-full p-2.5 border rounded-xl bg-slate-50">
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold mb-1">ব্যাজ (যেমন WHOLESALE, HOT DEAL):</label>
+            <input type="text" id="pFormBadge" class="w-full p-2.5 border rounded-xl bg-slate-50 outline-none focus:border-black">
+          </div>
+          <div class="flex items-center gap-2 pt-5">
+            <input type="checkbox" id="pFormFreeDelivery" class="w-4 h-4 text-black accent-black">
+            <label for="pFormFreeDelivery" class="font-bold text-slate-700 cursor-pointer">ফ্রি ডেলিভারি?</label>
+          </div>
         </div>
+
         <div>
           <label class="block font-bold mb-1">সংক্ষিপ্ত বিবরণ:</label>
-          <textarea id="pFormShortDesc" rows="2" class="w-full p-2.5 border rounded-xl bg-slate-50 font-bangla"></textarea>
+          <textarea id="pFormShortDesc" rows="2" class="w-full p-2.5 border rounded-xl bg-slate-50 font-bangla outline-none focus:border-black"></textarea>
         </div>
+
         <div class="flex justify-end gap-2 pt-2 border-t">
-          <button type="button" onclick="closeProductEditModal()" class="px-4 py-2 rounded-xl bg-slate-100 font-bold">বাতিল</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-black text-white font-bold">সংরক্ষণ করুন</button>
+          <button type="button" onclick="closeProductEditModal()" class="px-4 py-2 rounded-xl bg-slate-100 font-bold transition">বাতিল</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-black text-white font-bold transition">সংরক্ষণ করুন</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- ======================================================================= -->
+  <!-- JAVASCRIPT LOGIC -->
+  <!-- ======================================================================= -->
   <script>
-    // BOTH KEY IDENTIFIERS SAVED SIMULTANEOUSLY TO PREVENT ANY SYNC BREAKAGE
-    const KEYS = ['MULTICOMMERSE01', 'GHASHFORING'];
-    let productsList = [];
-    let generalSettings = {};
+    let appData = {
+      settings: {
+        brandName: "Ghash Foring",
+        brandTagline: "TRENDING • TRUSTED • TOP QUALITY",
+        announcementText: "⚡ আজকের মেগা পাইকারি ডিল: সারা দেশে ক্যাশ অন ডেলিভারি ও ১০০% অরিজিনাল পণ্যের নিশ্চয়তা!",
+        hotline: "+880 9617-100900",
+        whatsapp: "8801700000000",
+        deliveryInsideDhaka: 60,
+        deliveryOutsideDhaka: 120,
+        banner1: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&auto=format&fit=crop&q=80",
+        banner2: "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=1600&auto=format&fit=crop&q=80",
+        banner3: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1600&auto=format&fit=crop&q=80",
+        deliveryPolicy: "ঢাকার ভেতরে ২৪-৪৮ ঘণ্টায় এবং ঢাকার বাহিরে ৪৮-৭২ ঘণ্টায় ডেলিভারি।",
+        returnPolicy: "পণ্য হাতে পেয়ে কোনো সমস্যা পেলে ৭ দিনের ফ্রি এক্সচেঞ্জ সুবিধা।"
+      },
+      categories: [
+        { id: "wholesale", name: "Wholesale Deals", nameBn: "হোলসেল মেগা ডিল", badge: "হট ডিল" },
+        { id: "trending", name: "Trending Gadgets", nameBn: "ট্রেন্ডিং গ্যাজেট", badge: "সেরা পছন্দ" },
+        { id: "kitchen", name: "Kitchen & Dining", nameBn: "কিচেন ও হোমওয়্যার", badge: "জনপ্রিয়" }
+      ],
+      products: [
+        {
+          id: "MC-01",
+          sku: "SKU-MC-101",
+          category: "wholesale",
+          title: "Premium Wooden Carrom Board (Adidas Special Edition)",
+          price: 799,
+          regularPrice: 1499,
+          discount: "-47%",
+          badge: "WHOLESALE",
+          isFreeDelivery: false,
+          images: ["https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800&auto=format&fit=crop&q=80"],
+          shortDesc: "পরিবার ও বন্ধুদের সাথে আড্ডা ও বিনোদনের জন্য প্রিমিয়াম উডেন ক্যারাম বোর্ড।"
+        },
+        {
+          id: "MC-02",
+          sku: "SKU-MC-102",
+          category: "wholesale",
+          title: "Heavy Duty 2L Stainless Steel Meat & Vegetable Electric Chopper",
+          price: 1250,
+          regularPrice: 1950,
+          discount: "-36%",
+          badge: "WHOLESALE",
+          isFreeDelivery: false,
+          images: ["https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=800&auto=format&fit=crop&q=80"],
+          shortDesc: "মাংসের কিমা ও সবজি দ্রুত কুচি করার জন্য ৪-ব্লেড সম্পন্ন শক্তিশালী ইলেকট্রিক চপার।"
+        },
+        {
+          id: "MC-04",
+          sku: "SKU-MC-104",
+          category: "trending",
+          title: "Solar Warning Light / Evil Eye Multi-Strobe Car Flasher",
+          price: 850,
+          regularPrice: 1500,
+          discount: "-43%",
+          badge: "TRENDING",
+          isFreeDelivery: true,
+          images: ["https://images.unsplash.com/photo-1508974239320-0a029497e820?w=800&auto=format&fit=crop&q=80"],
+          shortDesc: "গাড়ি ও বাইকের নিরাপত্তার জন্য সৌরশক্তি চালিত ওয়ার্নিং স্ট্রোব লাইট।"
+        }
+      ]
+    };
 
-    function init() {
-      // 1. Load Products from both keys
-      let rawProds = null;
-      for (const k of KEYS) {
-        rawProds = localStorage.getItem('mc_products_' + k) || localStorage.getItem('luxera_products_' + k);
-        if (rawProds) break;
+    async function initAdmin() {
+      // 1. Try to load live products.json
+      try {
+        const res = await fetch('products.json?t=' + Date.now());
+        if (res.ok) {
+          const remoteData = await res.json();
+          if (remoteData) {
+            if (remoteData.settings) appData.settings = Object.assign(appData.settings, remoteData.settings);
+            if (Array.isArray(remoteData.categories)) appData.categories = remoteData.categories;
+            if (Array.isArray(remoteData.products)) appData.products = remoteData.products;
+          }
+        }
+      } catch (e) {
+        // Fallback to local draft if present
+        const localDraft = localStorage.getItem('mc_app_data_draft');
+        if (localDraft) {
+          try { appData = JSON.parse(localDraft); } catch (err) {}
+        }
       }
 
-      if (rawProds) {
-        try { productsList = JSON.parse(rawProds); } catch (e) { productsList = []; }
-      }
-
-      // If still empty, grab default from initial fallback
-      if (!productsList || productsList.length === 0) {
-        productsList = [
-          { id: 'MC-01', title: 'Premium Wooden Carrom Board', category: 'wholesale', price: 799, regularPrice: 1499, images: ['https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800'], badge: 'WHOLESALE', shortDesc: 'প্রিমিয়াম কোয়ালিটি উডেন ক্যারাম বোর্ড।' },
-          { id: 'MC-02', title: 'Heavy Duty 2L Electric Meat Chopper', category: 'wholesale', price: 1250, regularPrice: 1950, images: ['https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=800'], badge: 'WHOLESALE', shortDesc: 'শক্তিশালী ৪ ব্লেড সম্পন্ন ইলেকট্রিক চপার।' },
-          { id: 'MC-04', title: 'Solar Warning Evil Eye Car Flasher', category: 'trending', price: 850, regularPrice: 1500, images: ['https://images.unsplash.com/photo-1508974239320-0a029497e820?w=800'], badge: 'TRENDING', shortDesc: 'সোলার চালিত অ্যান্টি-কলিশন স্ট্রোব লাইট।' }
-        ];
-      }
-
-      // 2. Load Settings
-      let rawSettings = null;
-      for (const k of KEYS) {
-        rawSettings = localStorage.getItem('mc_settings_' + k);
-        if (rawSettings) break;
-      }
-      if (rawSettings) {
-        try { generalSettings = JSON.parse(rawSettings); } catch (e) {}
-      } else {
-        generalSettings = {
-          brandName: 'Ghash Foring',
-          brandTagline: 'TRENDING • TRUSTED • TOP QUALITY',
-          announcement: '⚡ আজকের মেগা পাইকারি ডিল: সারা দেশে ক্যাশ অন ডেলিভারি ও ১০০% অরিজিনাল পণ্যের নিশ্চয়তা!',
-          hotline: '+880 9617-100900',
-          whatsapp: '8801700000000',
-          insideCharge: 60,
-          outsideCharge: 120,
-          banner1: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&auto=format&fit=crop&q=80',
-          banner2: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=1600&auto=format&fit=crop&q=80',
-          banner3: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1600&auto=format&fit=crop&q=80'
-        };
-      }
-
-      // Populate UI
-      document.getElementById('cfgBrandName').value = generalSettings.brandName || '';
-      document.getElementById('cfgBrandTagline').value = generalSettings.brandTagline || '';
-      document.getElementById('cfgAnnouncement').value = generalSettings.announcement || '';
-      document.getElementById('cfgHotline').value = generalSettings.hotline || '';
-      document.getElementById('cfgWhatsapp').value = generalSettings.whatsapp || '';
-      document.getElementById('cfgInsideCharge').value = generalSettings.insideCharge ?? 60;
-      document.getElementById('cfgOutsideCharge').value = generalSettings.outsideCharge ?? 120;
-      document.getElementById('cfgBanner1').value = generalSettings.banner1 || '';
-      document.getElementById('cfgBanner2').value = generalSettings.banner2 || '';
-      document.getElementById('cfgBanner3').value = generalSettings.banner3 || '';
-
-      renderTable();
+      populateUI();
+      renderProductsTable();
+      updateJsonPreview();
     }
 
-    function renderTable() {
+    function populateUI() {
+      const s = appData.settings;
+      document.getElementById('cfgBrandName').value = s.brandName || '';
+      document.getElementById('cfgBrandTagline').value = s.brandTagline || '';
+      document.getElementById('cfgAnnouncement').value = s.announcementText || '';
+      document.getElementById('cfgHotline').value = s.hotline || '';
+      document.getElementById('cfgWhatsapp').value = s.whatsapp || '';
+      document.getElementById('cfgInsideCharge').value = s.deliveryInsideDhaka ?? 60;
+      document.getElementById('cfgOutsideCharge').value = s.deliveryOutsideDhaka ?? 120;
+      document.getElementById('cfgBanner1').value = s.banner1 || '';
+      document.getElementById('cfgBanner2').value = s.banner2 || '';
+      document.getElementById('cfgBanner3').value = s.banner3 || '';
+      document.getElementById('cfgDeliveryPolicy').value = s.deliveryPolicy || '';
+      document.getElementById('cfgReturnPolicy').value = s.returnPolicy || '';
+    }
+
+    function autoSaveDraft() {
+      appData.settings.brandName = document.getElementById('cfgBrandName').value.trim();
+      appData.settings.brandTagline = document.getElementById('cfgBrandTagline').value.trim();
+      appData.settings.announcementText = document.getElementById('cfgAnnouncement').value.trim();
+      appData.settings.hotline = document.getElementById('cfgHotline').value.trim();
+      appData.settings.whatsapp = document.getElementById('cfgWhatsapp').value.trim();
+      appData.settings.deliveryInsideDhaka = Number(document.getElementById('cfgInsideCharge').value) || 60;
+      appData.settings.deliveryOutsideDhaka = Number(document.getElementById('cfgOutsideCharge').value) || 120;
+      appData.settings.banner1 = document.getElementById('cfgBanner1').value.trim();
+      appData.settings.banner2 = document.getElementById('cfgBanner2').value.trim();
+      appData.settings.banner3 = document.getElementById('cfgBanner3').value.trim();
+      appData.settings.deliveryPolicy = document.getElementById('cfgDeliveryPolicy').value.trim();
+      appData.settings.returnPolicy = document.getElementById('cfgReturnPolicy').value.trim();
+
+      localStorage.setItem('mc_app_data_draft', JSON.stringify(appData));
+      updateJsonPreview();
+    }
+
+    function renderProductsTable() {
       const tbody = document.getElementById('adminProductsTbody');
-      tbody.innerHTML = productsList.map(p => `
+      tbody.innerHTML = appData.products.map(p => `
         <tr class="hover:bg-slate-50 transition">
-          <td class="p-3"><img src="${p.images?.[0] || p.image || ''}" class="w-12 h-12 rounded-xl object-cover border"></td>
-          <td class="p-3 font-bold">${p.title}</td>
+          <td class="p-3"><img src="${p.images?.[0] || p.image || ''}" class="w-12 h-12 rounded-xl object-cover border shrink-0"></td>
+          <td class="p-3 font-bold max-w-xs truncate">${p.title}</td>
           <td class="p-3 font-mono uppercase text-slate-500">${p.category}</td>
           <td class="p-3 font-black text-black">৳ ${p.price}</td>
           <td class="p-3 line-through text-slate-400">৳ ${p.regularPrice || p.price}</td>
+          <td class="p-3 text-center">${p.isFreeDelivery ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">হ্যাঁ</span>' : '-'}</td>
           <td class="p-3 text-right">
             <button onclick="openProductEditModal('${p.id}')" class="p-2 text-slate-600 hover:text-black"><i class="ph-bold ph-pencil-simple text-base"></i></button>
             <button onclick="deleteProduct('${p.id}')" class="p-2 text-red-500 hover:text-red-700"><i class="ph-bold ph-trash text-base"></i></button>
@@ -291,7 +442,7 @@
     function openProductEditModal(id) {
       document.getElementById('productModal').classList.remove('hidden');
       if (id) {
-        const prod = productsList.find(x => String(x.id) === String(id));
+        const prod = appData.products.find(x => String(x.id) === String(id));
         document.getElementById('modalProductHeading').innerText = 'প্রোডাক্ট এডিট করুন';
         document.getElementById('pFormId').value = prod.id;
         document.getElementById('pFormTitle').value = prod.title || '';
@@ -300,6 +451,7 @@
         document.getElementById('pFormCategory').value = prod.category || '';
         document.getElementById('pFormImages').value = (prod.images ? prod.images[0] : prod.image) || '';
         document.getElementById('pFormBadge').value = prod.badge || '';
+        document.getElementById('pFormFreeDelivery').checked = Boolean(prod.isFreeDelivery);
         document.getElementById('pFormShortDesc').value = prod.shortDesc || '';
       } else {
         document.getElementById('modalProductHeading').innerText = 'নতুন প্রোডাক্ট যোগ করুন';
@@ -310,6 +462,7 @@
         document.getElementById('pFormCategory').value = 'wholesale';
         document.getElementById('pFormImages').value = '';
         document.getElementById('pFormBadge').value = 'WHOLESALE';
+        document.getElementById('pFormFreeDelivery').checked = false;
         document.getElementById('pFormShortDesc').value = '';
       }
     }
@@ -327,86 +480,74 @@
       const category = document.getElementById('pFormCategory').value.trim();
       const img = document.getElementById('pFormImages').value.trim();
       const badge = document.getElementById('pFormBadge').value.trim();
+      const isFreeDelivery = document.getElementById('pFormFreeDelivery').checked;
       const shortDesc = document.getElementById('pFormShortDesc').value.trim();
 
       if (id) {
-        const idx = productsList.findIndex(x => String(x.id) === String(id));
+        const idx = appData.products.findIndex(x => String(x.id) === String(id));
         if (idx !== -1) {
-          productsList[idx] = { ...productsList[idx], title, price, regularPrice, category, images: [img], image: img, badge, shortDesc };
+          appData.products[idx] = { ...appData.products[idx], title, price, regularPrice, category, images: [img], image: img, badge, isFreeDelivery, shortDesc };
         }
       } else {
         const newId = 'MC-' + Date.now().toString().slice(-4);
-        productsList.unshift({ id: newId, sku: newId, title, price, regularPrice, category, images: [img], image: img, badge, shortDesc });
+        appData.products.unshift({ id: newId, sku: 'SKU-' + newId, title, price, regularPrice, category, images: [img], image: img, badge, isFreeDelivery, shortDesc });
       }
 
       closeProductEditModal();
-      renderTable();
-      saveAllChangesToBrowser(true);
+      renderProductsTable();
+      autoSaveDraft();
     }
 
     function deleteProduct(id) {
       if (!confirm('পণ্যটি কি মুছে ফেলতে চান?')) return;
-      productsList = productsList.filter(x => String(x.id) !== String(id));
-      renderTable();
-      saveAllChangesToBrowser(true);
+      appData.products = appData.products.filter(x => String(x.id) !== String(id));
+      renderProductsTable();
+      autoSaveDraft();
     }
 
-    function saveAllChangesToBrowser(showAlert = false) {
-      generalSettings.brandName = document.getElementById('cfgBrandName').value.trim();
-      generalSettings.brandTagline = document.getElementById('cfgBrandTagline').value.trim();
-      generalSettings.announcement = document.getElementById('cfgAnnouncement').value.trim();
-      generalSettings.hotline = document.getElementById('cfgHotline').value.trim();
-      generalSettings.whatsapp = document.getElementById('cfgWhatsapp').value.trim();
-      generalSettings.insideCharge = Number(document.getElementById('cfgInsideCharge').value) || 60;
-      generalSettings.outsideCharge = Number(document.getElementById('cfgOutsideCharge').value) || 120;
-      generalSettings.banner1 = document.getElementById('cfgBanner1').value.trim();
-      generalSettings.banner2 = document.getElementById('cfgBanner2').value.trim();
-      generalSettings.banner3 = document.getElementById('cfgBanner3').value.trim();
-
-      const timeNow = Date.now();
-
-      // Write simultaneously into both MULTICOMMERSE01 and GHASHFORING keys
-      for (const k of KEYS) {
-        localStorage.setItem('mc_products_' + k, JSON.stringify(productsList));
-        localStorage.setItem('luxera_products_' + k, JSON.stringify(productsList));
-        localStorage.setItem('mc_products_time_' + k, String(timeNow));
-        localStorage.setItem('mc_settings_' + k, JSON.stringify(generalSettings));
-
-        // Save Custom UI Overrides directly read by index.html
-        const customData = {
-          texts: {
-            'brand-name': generalSettings.brandName,
-            'brand-tagline': generalSettings.brandTagline,
-            'top-announcement': generalSettings.announcement,
-            'footer-brand': generalSettings.brandName
-          },
-          images: {
-            'banner-img-1': generalSettings.banner1,
-            'banner-img-2': generalSettings.banner2,
-            'banner-img-3': generalSettings.banner3
-          }
-        };
-        localStorage.setItem('theme_custom_' + k, JSON.stringify(customData));
+    function updateJsonPreview() {
+      const area = document.getElementById('jsonPreviewArea');
+      if (area) {
+        area.value = JSON.stringify(appData, null, 2);
       }
+    }
 
-      if (showAlert) {
-        alert('✓ সকল পরিবর্তন সফলভাবে সেভ হয়েছে! এখন আপনার সাইটটি (index.html) ওপেন করে রিলোড দিন।');
-      }
+    function openPublishModal() {
+      switchTab('tabPublish');
+    }
+
+    function copyPublishedJson() {
+      updateJsonPreview();
+      const code = document.getElementById('jsonPreviewArea').value;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('✓ সম্পূর্ণ কোড কপি করা হয়েছে!\n\nএবার আপনার GitHub রিপোজিটরির "products.json" ফাইলে যান, পুরো লেখা রিপ্লেস করে Commit Changes দিন। কয়েক সেকেন্ডের মধ্যে ওয়েবসাইটে পরিবর্তন দেখতে পাবেন।');
+      });
     }
 
     function switchTab(id) {
-      ['tabProducts', 'tabGeneral', 'tabBanners', 'tabDelivery'].forEach(t => {
-        document.getElementById(t).classList.toggle('hidden', t !== id);
+      ['tabProducts', 'tabGeneral', 'tabBanners', 'tabDelivery', 'tabPublish'].forEach(t => {
+        const el = document.getElementById(t);
         const nav = document.getElementById('nav' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (el) el.classList.toggle('hidden', t !== id);
         if (nav) {
           nav.className = (t === id) 
             ? 'w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-bold transition'
             : 'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition';
         }
       });
+
+      const titleMap = {
+        tabProducts: 'পণ্য তালিকা ও স্টক',
+        tabGeneral: 'সাধারণ সেটিংস ও টেক্সট',
+        tabBanners: 'হোমপেজ ব্যানার ব্যবস্থাপনা',
+        tabDelivery: 'ডেলিভারি চার্জ ও ফোন',
+        tabPublish: 'GitHub পাবলিশ ম্যানেজার'
+      };
+      document.getElementById('topBarTitle').innerText = titleMap[id] || 'অ্যাডমিন প্যানেল';
+      if (id === 'tabPublish') updateJsonPreview();
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initAdmin);
   </script>
 </body>
 </html>
