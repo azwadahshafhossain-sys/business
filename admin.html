@@ -2742,7 +2742,7 @@
       btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> <span>যাচাই হচ্ছে...</span>';
 
       try {
-        const res = await fetch('/api/admin/login', {
+        const res = await fetch('https://fancy-water-9087.azwadprogramming.workers.dev/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ storeId, pin })
